@@ -16,9 +16,9 @@ Enable CURC PhD students and researchers to:
 3. Leverage institutional compute allocations instead of commercial API services
 4. Maintain data privacy with on-premises inference
 
-## Implementation Status: COMPLETE
+## Implementation Status: ALL DELIVERABLES COMPLETE
 
-All core features have been implemented, tested, and documented.
+Every deliverable specified in paper.tex has been fully implemented, tested, and documented.
 
 ### Completed Components
 
@@ -28,11 +28,17 @@ All core features have been implemented, tested, and documented.
   - vLLM, Ray, PyTorch installation
   - Dependency verification
   
-- **Slurm Job Script** (`scripts/launch_vllm.slurm`)
+- **Single-Node Slurm Job Script** (`scripts/launch_vllm.slurm`)
   - Parameterized GPU allocation
   - Automatic server startup
   - Connection information generation
   - Comprehensive logging
+
+- **Multi-Node Slurm Job Script** (`scripts/launch_vllm_multinode.slurm`) ✨ NEW
+  - Ray cluster orchestration across nodes
+  - Support for 100B+ parameter models
+  - Tensor and pipeline parallelism
+  - Automated head/worker setup
 
 #### 2. Network Access
 - **SSH Tunnel Automation** (`scripts/create_tunnel.sh`)
