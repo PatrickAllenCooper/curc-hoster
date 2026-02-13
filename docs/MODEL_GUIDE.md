@@ -265,17 +265,17 @@ Based on latest open source LLM rankings:
 ## License Considerations
 
 ### Apache 2.0 (Qwen Models)
-- ✅ Commercial use allowed
-- ✅ Modification allowed
-- ✅ Distribution allowed
-- ✅ Patent grant included
+- Commercial use allowed
+- Modification allowed
+- Distribution allowed
+- Patent grant included
 - No restrictions on use case
 
 ### Llama 3 Community License
-- ✅ Commercial use allowed
-- ✅ Modification allowed
-- ✅ Distribution allowed
-- ⚠️ Some restrictions on very large deployments (>700M users)
+- Commercial use allowed
+- Modification allowed
+- Distribution allowed
+- Some restrictions on very large deployments (greater than 700M users)
 - Generally permissive for most use cases
 
 ---

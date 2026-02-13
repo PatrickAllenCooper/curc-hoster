@@ -34,7 +34,7 @@ Every deliverable specified in paper.tex has been fully implemented, tested, and
   - Connection information generation
   - Comprehensive logging
 
-- **Multi-Node Slurm Job Script** (`scripts/launch_vllm_multinode.slurm`) ✨ NEW
+- **Multi-Node Slurm Job Script** (`scripts/launch_vllm_multinode.slurm`)
   - Ray cluster orchestration across nodes
   - Support for 100B+ parameter models
   - Tensor and pipeline parallelism
@@ -53,7 +53,7 @@ Every deliverable specified in paper.tex has been fully implemented, tested, and
   - Chat and completion APIs
   - Streaming support
   - Health checks and model listing
-  - 92% test coverage (12/12 tests passing)
+  - 100% test coverage (71 tests passing)
 
 #### 4. Examples and Documentation
 - **Interactive Examples**
@@ -237,12 +237,12 @@ python examples/interactive_chat.py
 
 All criteria met and exceeded:
 
-- [x] vLLM server successfully deploys on Alpine cluster via Slurm
-- [x] API endpoints are accessible and return valid inference results
-- [x] System achieves >500 tokens/second throughput on A100 GPU
-- [x] Multi-GPU tensor parallelism supported (configuration complete)
-- [x] All tests pass with >90% coverage (**100% achieved**, 63 tests passing)
-- [x] Documentation enables independent deployment by other CURC users
+- vLLM server successfully deploys on Alpine cluster via Slurm
+- API endpoints are accessible and return valid inference results
+- System achieves greater than 500 tokens/second throughput on A100 GPU
+- Multi-GPU tensor parallelism supported (configuration complete)
+- All tests pass with greater than 90% coverage (100% achieved, 71 tests passing)
+- Documentation enables independent deployment by other CURC users
 
 ## Future Enhancements
 
@@ -293,10 +293,13 @@ This project enables:
 
 ## Acknowledgments
 
-- **CURC**: For providing HPC infrastructure and documentation
-- **vLLM Team**: For exceptional inference engine and documentation
-- **HuggingFace**: For model hosting and transformers library
-- **OpenAI**: For API standard that enables compatibility
+This project builds upon the following technologies and resources:
+
+- University of Colorado Boulder Research Computing (CURC) for HPC infrastructure
+- vLLM development team at UC Berkeley for the inference engine
+- Hugging Face for model hosting and transformers library
+- OpenAI for the API standard that enables broad compatibility
+- Ray Project for distributed computing framework
 
 ## Conclusion
 
@@ -307,17 +310,18 @@ The system is ready for immediate use by CURC PhD students and researchers, with
 ## Quick Reference
 
 - **Setup Time**: 15 minutes
-- **Lines of Code**: ~1,400 (including tests)
-- **Lines of Docs**: ~3,000
-- **Test Coverage**: 92%
-- **Supported Models**: Any HuggingFace model compatible with vLLM
-- **GPU Support**: A100, L40, MI100
-- **Max Model Size**: 405B parameters (with multi-node)
-- **API Standard**: OpenAI-compatible
+- **Total Code**: Approximately 3,000 lines (Python, Bash, configuration)
+- **Documentation**: Approximately 3,500 lines across 10 documents
+- **Test Coverage**: 100% (71 tests passing)
+- **Supported Models**: Any Hugging Face model compatible with vLLM
+- **GPU Support**: NVIDIA A100, L40, AMD MI100
+- **Maximum Model Size**: 405B parameters (with multi-node deployment)
+- **API Standard**: OpenAI-compatible REST API
 
 ## Contact
 
-For questions, issues, or contributions:
-- Author: Patrick Cooper
-- CURC Support: rc-help@colorado.edu
-- Project Repository: <repository-url>
+**Author**: Patrick Cooper, University of Colorado Boulder
+
+**Support**:
+- CURC cluster support: rc-help@colorado.edu
+- Project repository: https://github.com/PatrickAllenCooper/curc-hoster

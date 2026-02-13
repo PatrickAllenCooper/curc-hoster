@@ -242,17 +242,17 @@ Results are saved as JSON:
 
 ### Good Performance Indicators
 
-✓ P99 latency < 100ms for interactive queries  
-✓ Throughput > 500 TPS for 8B models  
-✓ <1% error rate  
-✓ Linear scaling with concurrent users (up to saturation)
+- P99 latency less than 100ms for interactive queries
+- Throughput greater than 500 TPS for 8B models
+- Error rate less than 1%
+- Linear scaling with concurrent users (up to saturation)
 
 ### Performance Issues
 
-⚠️ P99 latency > 5s → Check GPU utilization, increase resources  
-⚠️ Throughput < 200 TPS → Model too large, consider quantization  
-⚠️ Errors > 5% → Server overloaded or configuration issues  
-⚠️ Latency increases exponentially with users → Need more GPUs
+- P99 latency greater than 5s: Check GPU utilization, increase resources
+- Throughput less than 200 TPS: Model too large, consider quantization
+- Errors greater than 5%: Server overloaded or configuration issues
+- Latency increases exponentially with users: Need more GPUs
 
 ## Optimization Tips
 
