@@ -18,7 +18,7 @@ Enable CURC PhD students and researchers to:
 
 ## Implementation Status: ALL DELIVERABLES COMPLETE
 
-Every deliverable specified in paper.tex has been fully implemented, tested, and documented.
+All project deliverables have been fully implemented, tested, and documented.
 
 ### Completed Components
 
@@ -63,10 +63,12 @@ Every deliverable specified in paper.tex has been fully implemented, tested, and
 
 - **Comprehensive Documentation**
   - Quick Start Guide (`QUICKSTART.md`)
-  - User Guide (`Guidance_Documents/USER_GUIDE.md`)
-  - Technical Specification (`Guidance_Documents/TECHNICAL_SPECIFICATION.md`)
+  - Project Summary (`PROJECT_SUMMARY.md`)
+  - Model Selection Guide (`docs/MODEL_GUIDE.md`)
   - Architecture Diagrams (`docs/architecture_diagram.md`)
   - Troubleshooting Guide (`docs/TROUBLESHOOTING.md`)
+  - Benchmarking Guide (`docs/BENCHMARKING.md`)
+  - Multi-Node Guide (`docs/MULTI_NODE.md`)
 
 #### 5. Configuration Management
 - **Server Configurations** (`config/server_config.yaml`)
@@ -154,14 +156,10 @@ curc-LLM-hoster/
 ├── README.md                          # Project overview
 ├── QUICKSTART.md                      # 15-minute setup guide
 ├── PROJECT_SUMMARY.md                 # This file
-├── paper.tex                          # Project goals (LaTeX)
+├── LICENSE                            # MIT License
 ├── requirements.txt                   # Python dependencies
 ├── setup.py                           # Package installation
 ├── pytest.ini                         # Test configuration
-│
-├── Guidance_Documents/
-│   ├── TECHNICAL_SPECIFICATION.md     # Architecture (500+ lines)
-│   └── USER_GUIDE.md                  # User documentation (600+ lines)
 │
 ├── docs/
 │   ├── architecture_diagram.md        # System diagrams
@@ -233,9 +231,9 @@ sbatch scripts/launch_vllm.slurm
 python examples/interactive_chat.py
 ```
 
-## Success Criteria (from paper.tex)
+## Success Criteria
 
-All criteria met and exceeded:
+All project criteria met and exceeded:
 
 - vLLM server successfully deploys on Alpine cluster via Slurm
 - API endpoints are accessible and return valid inference results

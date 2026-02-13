@@ -93,50 +93,55 @@ response = client.chat("Explain quantum computing in simple terms.")
 print(response)
 ```
 
-For detailed instructions, see the [User Guide](Guidance_Documents/USER_GUIDE.md).
+For detailed instructions, see the [Quick Start Guide](QUICKSTART.md) and [documentation](#documentation).
 
 ## Project Structure
 
 ```
 curc-LLM-hoster/
 ├── README.md                           # Project overview
-├── paper.tex                           # Project goals and objectives
+├── QUICKSTART.md                       # 15-minute setup guide
+├── PROJECT_SUMMARY.md                  # Complete project documentation
+├── LICENSE                             # MIT License
 ├── requirements.txt                    # Python dependencies
 ├── setup.py                            # Package installation
 ├── pytest.ini                          # Test configuration
-├── Guidance_Documents/                 # Technical documentation
-│   ├── TECHNICAL_SPECIFICATION.md      # Architecture and design
-│   └── USER_GUIDE.md                   # End-user documentation
+│
 ├── scripts/                            # Deployment automation
 │   ├── setup_environment.sh            # CURC environment setup
 │   ├── launch_vllm.slurm               # Single-node Slurm job
 │   ├── launch_vllm_multinode.slurm     # Multi-node deployment
 │   ├── create_tunnel.sh                # SSH tunnel automation
 │   └── benchmark_performance.py        # Performance benchmarking
+│
 ├── src/                                # Source code
 │   └── client/                         # Client SDK
 │       ├── __init__.py
 │       └── curc_llm_client.py          # OpenAI-compatible client
+│
 ├── examples/                           # Usage examples
 │   ├── basic_chat.py                   # Simple chat example
 │   ├── streaming_chat.py               # Streaming responses
 │   └── interactive_chat.py             # Interactive CLI
+│
 ├── config/                             # Configuration files
 │   ├── server_config.yaml              # vLLM server configs (8 presets)
 │   └── .env.example                    # Environment template
+│
 ├── tests/                              # Test suite (100% coverage)
 │   ├── __init__.py
-│   ├── test_client.py                  # Client tests
-│   ├── test_validation.py              # Validation & edge cases
-│   ├── test_examples.py                # Infrastructure tests
-│   └── test_benchmark.py               # Benchmark tests
-├── docs/                               # Additional documentation
-│   ├── MODEL_GUIDE.md                  # Model selection guide
-│   ├── BENCHMARKING.md                 # Performance benchmarking
-│   ├── MULTI_NODE.md                   # Multi-node deployment
-│   ├── TROUBLESHOOTING.md              # Problem solving
-│   └── architecture_diagram.md         # System diagrams
-└── logs/                               # Runtime logs (auto-created)
+│   ├── test_client.py                  # Client tests (22 tests)
+│   ├── test_validation.py              # Validation tests (23 tests)
+│   ├── test_examples.py                # Infrastructure tests (20 tests)
+│   ├── test_benchmark.py               # Benchmark tests (6 tests)
+│   └── TEST_REPORT.md                  # Detailed test documentation
+│
+└── docs/                               # Documentation
+    ├── MODEL_GUIDE.md                  # Model selection guide
+    ├── BENCHMARKING.md                 # Performance benchmarking
+    ├── MULTI_NODE.md                   # Multi-node deployment
+    ├── TROUBLESHOOTING.md              # Problem solving
+    └── architecture_diagram.md         # System diagrams
 ```
 
 ## Architecture
@@ -148,7 +153,7 @@ The system deploys vLLM inference servers across CURC Alpine cluster nodes, orch
 - **Orchestration**: Ray cluster for multi-node coordination
 - **Scheduling**: Slurm job submission and resource management
 
-See `Guidance_Documents/TECHNICAL_SPECIFICATION.md` for detailed architecture.
+For detailed architecture documentation, see `docs/architecture_diagram.md` and `PROJECT_SUMMARY.md`.
 
 ## Supported Models
 
@@ -203,16 +208,19 @@ For performance benchmarking tools, see `scripts/benchmark_performance.py` and `
 
 ## Documentation
 
-### Core Documentation
+### Getting Started
 
-- **paper.tex**: Project goals and success criteria
-- **QUICKSTART.md**: 15-minute deployment guide
-- **Guidance_Documents/TECHNICAL_SPECIFICATION.md**: Architecture and design
-- **Guidance_Documents/USER_GUIDE.md**: Complete user guide
-- **docs/MODEL_GUIDE.md**: Model selection guidance
-- **docs/BENCHMARKING.md**: Performance testing guide
-- **docs/MULTI_NODE.md**: Multi-node deployment guide
-- **docs/TROUBLESHOOTING.md**: Systematic problem solving
+- **README.md** (this file): Project overview and quick reference
+- **QUICKSTART.md**: 15-minute deployment guide for immediate use
+- **PROJECT_SUMMARY.md**: Complete project documentation and technical details
+
+### Guides
+
+- **docs/MODEL_GUIDE.md**: Model selection and configuration guidance
+- **docs/BENCHMARKING.md**: Performance testing and optimization
+- **docs/MULTI_NODE.md**: Multi-node deployment for large models
+- **docs/TROUBLESHOOTING.md**: Systematic problem solving and debugging
+- **docs/architecture_diagram.md**: System architecture and component diagrams
 
 ### Example Code
 
@@ -222,31 +230,25 @@ For performance benchmarking tools, see `scripts/benchmark_performance.py` and `
 
 ### External References
 
-- [CURC LLM Documentation](https://curc.readthedocs.io/en/latest/ai-ml/llms.html)
-- [vLLM Documentation](https://docs.vllm.ai/)
-- [vLLM OpenAI-Compatible Server](https://docs.vllm.ai/en/stable/serving/openai_compatible_server/)
-- [PagedAttention Paper](https://arxiv.org/abs/2309.06180)
+- [CURC Alpine Documentation](https://curc.readthedocs.io/en/latest/ai-ml/llms.html)
+- [vLLM Official Documentation](https://docs.vllm.ai/)
+- [vLLM OpenAI Server Guide](https://docs.vllm.ai/en/stable/serving/openai_compatible_server/)
+- [PagedAttention Paper (arXiv:2309.06180)](https://arxiv.org/abs/2309.06180)
 
-## Development Status
+## Implementation Status
 
-**All Deliverables Complete**
+This project is complete and production-ready. Key features include:
 
-This project has achieved all objectives specified in paper.tex:
-
-- Research and architecture design
-- Technical specification and documentation
-- Single-node deployment scripts (Slurm, environment setup)
-- Multi-node deployment scripts (Ray cluster orchestration)
+- Single-node and multi-node deployment scripts
 - SSH tunnel automation for secure local access
 - Python client SDK with 100% test coverage
 - Comprehensive test suite (71 unit tests passing)
 - Performance benchmarking suite (latency, throughput, concurrency)
-- Complete user documentation and working examples
+- Complete documentation and working examples
 - Configuration management with 8 model presets
-- Support for high-end models (Qwen 2.5 72B, Llama 3.3 70B)
-- Comprehensive model selection guide
+- Support for state-of-the-art models (Qwen 2.5 72B, Llama 3.3 70B)
 
-The system is production-ready for immediate deployment on CURC resources.
+The system is ready for immediate deployment on CURC resources.
 
 ## Testing
 
@@ -289,7 +291,7 @@ University of Colorado Boulder
 
 ### Status
 
-This project is complete and production-ready. All deliverables from paper.tex have been implemented and tested.
+This project is complete and production-ready. All components have been fully implemented and tested.
 
 ### License
 

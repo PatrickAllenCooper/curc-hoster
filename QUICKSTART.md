@@ -302,8 +302,11 @@ Edit `config/server_config.yaml` for performance tuning.
 
 ### Read Full Documentation
 
-- `Guidance_Documents/USER_GUIDE.md` - Complete user guide
-- `Guidance_Documents/TECHNICAL_SPECIFICATION.md` - Architecture details
+- `PROJECT_SUMMARY.md` - Complete project documentation
+- `docs/MODEL_GUIDE.md` - Model selection guide
+- `docs/BENCHMARKING.md` - Performance testing
+- `docs/MULTI_NODE.md` - Multi-node deployment
+- `docs/TROUBLESHOOTING.md` - Problem solving
 - `examples/` - More code examples
 
 ## Cleanup

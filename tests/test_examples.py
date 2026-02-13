@@ -145,23 +145,23 @@ class TestDocumentation:
         
         assert 'Quick Start' in content
     
-    def test_user_guide_exists(self):
-        """Test USER_GUIDE.md exists."""
-        assert os.path.exists('Guidance_Documents/USER_GUIDE.md')
+    def test_project_summary_exists(self):
+        """Test PROJECT_SUMMARY.md exists."""
+        assert os.path.exists('PROJECT_SUMMARY.md')
         
-        with open('Guidance_Documents/USER_GUIDE.md', 'r') as f:
+        with open('PROJECT_SUMMARY.md', 'r') as f:
             content = f.read()
         
-        assert 'User Guide' in content
+        assert 'Project Summary' in content
     
-    def test_technical_spec_exists(self):
-        """Test TECHNICAL_SPECIFICATION.md exists."""
-        assert os.path.exists('Guidance_Documents/TECHNICAL_SPECIFICATION.md')
+    def test_model_guide_exists(self):
+        """Test MODEL_GUIDE.md exists."""
+        assert os.path.exists('docs/MODEL_GUIDE.md')
         
-        with open('Guidance_Documents/TECHNICAL_SPECIFICATION.md', 'r') as f:
+        with open('docs/MODEL_GUIDE.md', 'r') as f:
             content = f.read()
         
-        assert 'Technical Specification' in content
+        assert 'Model' in content
     
     def test_troubleshooting_exists(self):
         """Test TROUBLESHOOTING.md exists."""

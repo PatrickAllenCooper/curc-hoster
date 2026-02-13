@@ -414,5 +414,6 @@ For model-specific questions:
 - vLLM: https://github.com/vllm-project/vllm
 
 For CURC deployment help, see:
-- `Guidance_Documents/USER_GUIDE.md`
+- `QUICKSTART.md`
+- `PROJECT_SUMMARY.md`
 - `docs/TROUBLESHOOTING.md`
