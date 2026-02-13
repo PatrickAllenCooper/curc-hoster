@@ -8,6 +8,8 @@ Author: Patrick Cooper
 
 This project provides a production-grade deployment solution for hosting and serving LLMs on CURC's Alpine HPC cluster. Built on vLLM and Ray, it enables efficient multi-GPU and multi-node inference with OpenAI-compatible API endpoints.
 
+**New to this project?** Start with the [Quick Start Guide](QUICKSTART.md) to get running in 15 minutes.
+
 ## Key Features
 
 - **High Performance**: 500+ tokens/second throughput on single A100 GPU
