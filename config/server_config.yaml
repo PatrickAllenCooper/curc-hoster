@@ -1,0 +1,159 @@
+# CURC vLLM Server Configuration
+# Author: Patrick Cooper
+#
+# This file defines configurations for different deployment scenarios.
+# Reference this file when launching vLLM servers with custom settings.
+
+# Default configuration for small models (7B-13B parameters)
+default:
+  model: "meta-llama/Llama-3.1-8B-Instruct"
+  tensor_parallel_size: 1
+  pipeline_parallel_size: 1
+  max_model_len: 4096
+  gpu_memory_utilization: 0.9
+  max_num_seqs: 256
+  max_num_batched_tokens: 4096
+  host: "0.0.0.0"
+  port: 8000
+
+# Configuration for medium models (30B-34B parameters)
+medium:
+  model: "meta-llama/Llama-3.1-34B-Instruct"
+  tensor_parallel_size: 2
+  pipeline_parallel_size: 1
+  max_model_len: 4096
+  gpu_memory_utilization: 0.9
+  max_num_seqs: 128
+  max_num_batched_tokens: 2048
+  host: "0.0.0.0"
+  port: 8000
+
+# Configuration for large models (70B parameters)
+large:
+  model: "meta-llama/Llama-3.1-70B-Instruct"
+  tensor_parallel_size: 4
+  pipeline_parallel_size: 1
+  max_model_len: 4096
+  gpu_memory_utilization: 0.9
+  max_num_seqs: 64
+  max_num_batched_tokens: 1024
+  host: "0.0.0.0"
+  port: 8000
+
+# Configuration for very large models (405B parameters)
+xlarge:
+  model: "meta-llama/Llama-3.1-405B-Instruct"
+  tensor_parallel_size: 8
+  pipeline_parallel_size: 2
+  max_model_len: 4096
+  gpu_memory_utilization: 0.9
+  max_num_seqs: 32
+  max_num_batched_tokens: 512
+  host: "0.0.0.0"
+  port: 8000
+
+# Configuration for quantized models (reduced memory)
+quantized:
+  model: "meta-llama/Llama-3.1-70B-Instruct"
+  tensor_parallel_size: 2
+  pipeline_parallel_size: 1
+  max_model_len: 4096
+  gpu_memory_utilization: 0.9
+  max_num_seqs: 128
+  max_num_batched_tokens: 2048
+  quantization: "awq"  # Options: awq, gptq, squeezellm
+  host: "0.0.0.0"
+  port: 8000
+
+# High-throughput configuration (batch processing)
+batch:
+  model: "meta-llama/Llama-3.1-8B-Instruct"
+  tensor_parallel_size: 1
+  pipeline_parallel_size: 1
+  max_model_len: 2048
+  gpu_memory_utilization: 0.95
+  max_num_seqs: 512
+  max_num_batched_tokens: 8192
+  host: "0.0.0.0"
+  port: 8000
+
+# Low-latency configuration (interactive use)
+interactive:
+  model: "meta-llama/Llama-3.1-8B-Instruct"
+  tensor_parallel_size: 1
+  pipeline_parallel_size: 1
+  max_model_len: 4096
+  gpu_memory_utilization: 0.8
+  max_num_seqs: 64
+  max_num_batched_tokens: 2048
+  host: "0.0.0.0"
+  port: 8000
+
+# Development/testing configuration
+dev:
+  model: "meta-llama/Llama-3.1-8B-Instruct"
+  tensor_parallel_size: 1
+  pipeline_parallel_size: 1
+  max_model_len: 2048
+  gpu_memory_utilization: 0.7
+  max_num_seqs: 32
+  max_num_batched_tokens: 1024
+  host: "0.0.0.0"
+  port: 8000
+
+# Slurm job configurations
+slurm:
+  default:
+    nodes: 1
+    ntasks: 1
+    time: "08:00:00"
+    partition: "aa100"
+    gres: "gpu:1"
+    qos: "normal"
+  
+  medium:
+    nodes: 1
+    ntasks: 1
+    time: "12:00:00"
+    partition: "aa100"
+    gres: "gpu:2"
+    qos: "normal"
+  
+  large:
+    nodes: 1
+    ntasks: 1
+    time: "24:00:00"
+    partition: "aa100"
+    gres: "gpu:4"
+    qos: "normal"
+  
+  xlarge:
+    nodes: 2
+    ntasks: 2
+    time: "24:00:00"
+    partition: "aa100"
+    gres: "gpu:4"
+    qos: "normal"
+
+# Security settings
+security:
+  # Set to true to require API key authentication
+  require_api_key: false
+  
+  # API key (should be set via environment variable in production)
+  api_key_env: "CURC_LLM_API_KEY"
+  
+  # Allowed origins for CORS (if needed)
+  allowed_origins:
+    - "http://localhost:*"
+    - "http://127.0.0.1:*"
+
+# Logging configuration
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  
+  # Log files
+  server_log: "logs/vllm-server.log"
+  access_log: "logs/vllm-access.log"
+  error_log: "logs/vllm-error.log"
