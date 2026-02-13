@@ -58,11 +58,30 @@ Create logs directory:
 mkdir -p logs
 ```
 
-Submit the Slurm job:
+Submit the Slurm job.
+
+**For best performance** (Qwen 2.5 72B - top ranked open source model):
+
+```bash
+MODEL_NAME="Qwen/Qwen2.5-72B-Instruct-AWQ" sbatch scripts/launch_vllm.slurm
+```
+
+**Or use the default** (Llama 3.1 8B - smaller, faster):
 
 ```bash
 sbatch scripts/launch_vllm.slurm
 ```
+
+**Other high-end options** for single A100 80GB:
+```bash
+# Llama 3.3 70B (excellent for coding)
+MODEL_NAME="hugging-quants/Meta-Llama-3.3-70B-Instruct-AWQ-INT4" sbatch scripts/launch_vllm.slurm
+
+# Qwen 2.5 32B (fastest, 128K context)
+MODEL_NAME="Qwen/Qwen2.5-32B-Instruct-AWQ" sbatch scripts/launch_vllm.slurm
+```
+
+See `docs/MODEL_GUIDE.md` for complete model selection guidance.
 
 You'll see output like:
 ```

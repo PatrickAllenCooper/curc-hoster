@@ -137,13 +137,42 @@ See `Guidance_Documents/TECHNICAL_SPECIFICATION.md` for detailed architecture.
 
 ## Supported Models
 
-The infrastructure supports any Hugging Face model compatible with vLLM:
+The infrastructure supports any Hugging Face model compatible with vLLM.
 
-- Llama 3.1 (8B, 70B, 405B)
+### Recommended High-End Models for Single A100 80GB (AWQ Quantized)
+
+Based on February 2026 rankings, these are the **best open source LLMs** for single GPU deployment:
+
+1. **Qwen 2.5 72B AWQ** (Recommended)
+   - Top ranked open source model
+   - ~36 GB VRAM, 128K context
+   - Apache 2.0 license
+   - `Qwen/Qwen2.5-72B-Instruct-AWQ`
+
+2. **Llama 3.3 70B AWQ**
+   - Excellent for coding
+   - ~35 GB VRAM
+   - `hugging-quants/Meta-Llama-3.3-70B-Instruct-AWQ-INT4`
+
+3. **Llama 3.1 70B AWQ**
+   - Proven and stable
+   - ~35 GB VRAM
+   - `hugging-quants/Meta-Llama-3.1-70B-Instruct-AWQ-INT4`
+
+4. **Qwen 2.5 32B AWQ** (Fastest)
+   - 2-3x faster inference
+   - ~16 GB VRAM, 128K context
+   - `Qwen/Qwen2.5-32B-Instruct-AWQ`
+
+See `docs/MODEL_GUIDE.md` for detailed model selection guidance.
+
+### Also Supported
+
+- Llama 3.1 (8B, 70B, 405B) - FP16 multi-GPU
 - Mistral/Mixtral series
 - Gemma series
-- GPT-NeoX variants
-- And many more
+- DeepSeek models
+- And many more from Hugging Face
 
 ## Performance
 
