@@ -1,0 +1,80 @@
+\documentclass{article}
+\usepackage[utf-8]{inputenc}
+\usepackage{hyperref}
+
+\title{CURC LLM Hosting Infrastructure}
+\author{Patrick Cooper}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Project Goal}
+
+This project aims to develop a production-grade infrastructure for hosting and serving Large Language Models (LLMs) on University of Colorado Boulder Research Computing (CURC) resources, specifically targeting the Alpine HPC cluster with GPU compute allocations.
+
+\section{Objectives}
+
+\subsection{Primary Objectives}
+\begin{itemize}
+    \item Deploy vLLM-based inference server on CURC Alpine cluster using Slurm workload manager
+    \item Provide OpenAI-compatible REST API endpoints for LLM inference
+    \item Support multi-GPU and multi-node distributed inference for large models
+    \item Implement efficient resource utilization through PagedAttention and continuous batching
+    \item Enable serving of models ranging from 7B to 405B+ parameters
+\end{itemize}
+
+\subsection{Technical Requirements}
+\begin{itemize}
+    \item Automated deployment scripts for Slurm job submission
+    \item Ray cluster orchestration for distributed inference
+    \item Support for tensor parallelism and pipeline parallelism
+    \item Model management system for loading from Hugging Face Hub
+    \item Comprehensive logging and monitoring of inference performance
+    \item Authentication and access control for API endpoints
+\end{itemize}
+
+\subsection{Performance Goals}
+\begin{itemize}
+    \item High-throughput batch inference (500+ tokens per second)
+    \item Low-latency interactive inference (P99 $<$ 100ms for single requests)
+    \item Support for concurrent multi-user workloads (10-100 simultaneous users)
+    \item Efficient GPU memory utilization through PagedAttention
+    \item Automatic request batching and scheduling
+\end{itemize}
+
+\section{Target Environment}
+
+\begin{itemize}
+    \item \textbf{Cluster}: CURC Alpine HPC cluster
+    \item \textbf{GPU Resources}: NVIDIA A100, L40, or AMD MI100 accelerators
+    \item \textbf{Workload Manager}: Slurm
+    \item \textbf{Allocation}: PhD student compute allocation (Ascent or Peak tier)
+    \item \textbf{Frameworks}: vLLM, Ray, Hugging Face Transformers
+\end{itemize}
+
+\section{Deliverables}
+
+\begin{enumerate}
+    \item Slurm batch scripts for single-node and multi-node vLLM deployment
+    \item Python-based vLLM server configuration and launch scripts
+    \item Client SDK and example scripts for API interaction
+    \item Documentation covering deployment, usage, and troubleshooting
+    \item Performance benchmarking suite for throughput and latency measurement
+    \item Comprehensive test suite for validation
+\end{enumerate}
+
+\section{Success Criteria}
+
+The project will be considered successful when:
+\begin{itemize}
+    \item vLLM server successfully deploys on Alpine cluster via Slurm
+    \item API endpoints are accessible and return valid inference results
+    \item System achieves $>$ 500 tokens/second throughput on A100 GPU
+    \item Multi-GPU tensor parallelism verified for 70B+ parameter models
+    \item All tests pass with $>$ 90\% coverage
+    \item Documentation enables independent deployment by other CURC users
+\end{itemize}
+
+\end{document}
