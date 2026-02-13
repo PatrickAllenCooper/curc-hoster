@@ -197,20 +197,24 @@ With coverage report:
 
 ```bash
 pytest tests/ --cov=src --cov-report=html
+open htmlcov/index.html  # View detailed report
 ```
 
-Current test statistics:
-- **12 unit tests** passing
-- **92% code coverage**
-- Mocked dependencies for offline testing
+**Test Statistics**:
+- **63 unit tests** passing
+- **100% code coverage** (exceeds 90% target)
+- **3 test suites** (client, validation, infrastructure)
+- Comprehensive mocking for offline testing
 - Integration tests available (require running server)
 
-Test categories:
-- Client initialization and configuration
-- Chat and completion interfaces
-- Streaming responses
-- Health checks and model listing
-- Error handling
+**Test Categories**:
+- Core client functionality (22 tests)
+- Parameter validation and edge cases (23 tests)
+- Infrastructure and documentation validation (20 tests)
+- Error handling and concurrency
+- Unicode, special characters, extreme values
+
+See `tests/TEST_REPORT.md` for detailed test documentation.
 
 ## Contributing
 

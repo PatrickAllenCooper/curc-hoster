@@ -102,6 +102,41 @@ class TestCURCLLMClient:
         assert chunks == ["Hello", " world", "!"]
     
     @patch('src.client.curc_llm_client.OpenAI')
+    def test_chat_stream_with_system_prompt(self, mock_openai):
+        """Test streaming chat with system prompt."""
+        mock_chunks = [
+            Mock(choices=[Mock(delta=Mock(content="Response"))]),
+        ]
+        mock_openai.return_value.chat.completions.create.return_value = iter(mock_chunks)
+        
+        client = CURCLLMClient()
+        chunks = list(client.chat_stream("Hi", system_prompt="You are helpful."))
+        
+        call_args = mock_openai.return_value.chat.completions.create.call_args
+        messages = call_args.kwargs['messages']
+        
+        assert len(messages) == 2
+        assert messages[0]['role'] == 'system'
+        assert messages[0]['content'] == 'You are helpful.'
+        assert chunks == ["Response"]
+    
+    @patch('src.client.curc_llm_client.OpenAI')
+    def test_chat_stream_with_empty_chunks(self, mock_openai):
+        """Test streaming chat handles empty content."""
+        mock_chunks = [
+            Mock(choices=[Mock(delta=Mock(content="Hello"))]),
+            Mock(choices=[Mock(delta=Mock(content=None))]),  # Empty chunk
+            Mock(choices=[Mock(delta=Mock(content=" world"))]),
+        ]
+        mock_openai.return_value.chat.completions.create.return_value = iter(mock_chunks)
+        
+        client = CURCLLMClient()
+        chunks = list(client.chat_stream("Hi"))
+        
+        # Should skip None chunks
+        assert chunks == ["Hello", " world"]
+    
+    @patch('src.client.curc_llm_client.OpenAI')
     def test_complete(self, mock_openai):
         """Test completion generation."""
         mock_response = Mock()
@@ -112,6 +147,59 @@ class TestCURCLLMClient:
         response = client.complete("The future is ")
         
         assert response == "bright and full of possibilities."
+    
+    @patch('src.client.curc_llm_client.OpenAI')
+    def test_complete_stream(self, mock_openai):
+        """Test streaming completion."""
+        mock_chunks = [
+            Mock(choices=[Mock(text="The ")]),
+            Mock(choices=[Mock(text="answer ")]),
+            Mock(choices=[Mock(text="is 42.")]),
+        ]
+        mock_openai.return_value.completions.create.return_value = iter(mock_chunks)
+        
+        client = CURCLLMClient()
+        chunks = list(client.complete_stream("What is the answer?"))
+        
+        assert chunks == ["The ", "answer ", "is 42."]
+    
+    @patch('src.client.curc_llm_client.OpenAI')
+    def test_complete_stream_with_empty_chunks(self, mock_openai):
+        """Test streaming completion handles empty text."""
+        mock_chunks = [
+            Mock(choices=[Mock(text="Hello")]),
+            Mock(choices=[Mock(text=None)]),  # Empty chunk
+            Mock(choices=[Mock(text=" there")]),
+        ]
+        mock_openai.return_value.completions.create.return_value = iter(mock_chunks)
+        
+        client = CURCLLMClient()
+        chunks = list(client.complete_stream("Say hi"))
+        
+        # Should skip None chunks
+        assert chunks == ["Hello", " there"]
+    
+    @patch('src.client.curc_llm_client.OpenAI')
+    def test_complete_with_custom_parameters(self, mock_openai):
+        """Test completion with custom parameters."""
+        mock_response = Mock()
+        mock_response.choices = [Mock(text="Result")]
+        mock_openai.return_value.completions.create.return_value = mock_response
+        
+        client = CURCLLMClient()
+        response = client.complete(
+            "Test",
+            model="custom-model",
+            temperature=0.9,
+            max_tokens=100,
+            top_p=0.95
+        )
+        
+        call_args = mock_openai.return_value.completions.create.call_args
+        assert call_args.kwargs['model'] == 'custom-model'
+        assert call_args.kwargs['temperature'] == 0.9
+        assert call_args.kwargs['max_tokens'] == 100
+        assert call_args.kwargs['top_p'] == 0.95
     
     @patch('src.client.curc_llm_client.httpx.Client')
     def test_health_check(self, mock_httpx):
@@ -155,6 +243,70 @@ class TestCURCLLMClient:
         assert isinstance(client, CURCLLMClient)
         assert client.base_url == "http://test:8000"
         assert client.api_key == "key"
+    
+    @patch('src.client.curc_llm_client.httpx.Client')
+    def test_health_check_error(self, mock_httpx):
+        """Test health check with server error."""
+        mock_response = Mock()
+        mock_response.raise_for_status.side_effect = Exception("Server error")
+        mock_httpx.return_value.get.return_value = mock_response
+        
+        client = CURCLLMClient()
+        
+        with pytest.raises(Exception) as exc_info:
+            client.health_check()
+        
+        assert "Server error" in str(exc_info.value)
+    
+    @patch('src.client.curc_llm_client.httpx.Client')
+    def test_get_models_error(self, mock_httpx):
+        """Test get models with server error."""
+        mock_response = Mock()
+        mock_response.raise_for_status.side_effect = Exception("Connection failed")
+        mock_httpx.return_value.get.return_value = mock_response
+        
+        client = CURCLLMClient()
+        
+        with pytest.raises(Exception) as exc_info:
+            client.get_models()
+        
+        assert "Connection failed" in str(exc_info.value)
+    
+    def test_client_base_url_strips_trailing_slash(self):
+        """Test that base URL trailing slash is removed."""
+        client = CURCLLMClient(base_url="http://example.com:8000/")
+        assert client.base_url == "http://example.com:8000"
+    
+    @patch.dict(os.environ, {'CURC_LLM_API_KEY': 'env-key'})
+    def test_api_key_from_environment(self):
+        """Test API key loaded from environment variable."""
+        client = CURCLLMClient()
+        assert client.api_key == "env-key"
+    
+    @patch('src.client.curc_llm_client.OpenAI')
+    def test_chat_with_all_parameters(self, mock_openai):
+        """Test chat with all custom parameters."""
+        mock_response = Mock()
+        mock_response.choices = [Mock(message=Mock(content="Response"))]
+        mock_openai.return_value.chat.completions.create.return_value = mock_response
+        
+        client = CURCLLMClient()
+        response = client.chat(
+            message="Test",
+            model="gpt-4",
+            system_prompt="Be helpful",
+            temperature=0.8,
+            max_tokens=1000,
+            top_p=0.9,
+            frequency_penalty=0.5
+        )
+        
+        call_args = mock_openai.return_value.chat.completions.create.call_args
+        assert call_args.kwargs['model'] == 'gpt-4'
+        assert call_args.kwargs['temperature'] == 0.8
+        assert call_args.kwargs['max_tokens'] == 1000
+        assert call_args.kwargs['top_p'] == 0.9
+        assert call_args.kwargs['frequency_penalty'] == 0.5
 
 
 class TestClientIntegration:
