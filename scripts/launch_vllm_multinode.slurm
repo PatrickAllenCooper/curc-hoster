@@ -47,7 +47,7 @@ RAY_DASHBOARD_PORT="${RAY_DASHBOARD_PORT:-8265}"
 # Directories
 WORK_DIR="${SLURM_SUBMIT_DIR}"
 LOG_DIR="${WORK_DIR}/logs"
-VENV_DIR="${WORK_DIR}/vllm-env"
+CONDA_ENV_NAME="vllm-env"
 
 # Create log directory
 mkdir -p "${LOG_DIR}"
@@ -70,16 +70,26 @@ echo ""
 # Load required modules
 echo "Loading modules..."
 module purge
-module load python/3.10
+module load anaconda
 module load cuda/12.1
 
-# Activate virtual environment
-echo "Activating virtual environment..."
-source "${VENV_DIR}/bin/activate"
+# Initialize conda for bash
+eval "$(conda shell.bash hook)"
+
+# Check if conda environment exists
+if ! conda env list | grep -q "^${CONDA_ENV_NAME} "; then
+    echo "ERROR: Conda environment '${CONDA_ENV_NAME}' not found"
+    echo "Please run: scripts/setup_environment.sh"
+    exit 1
+fi
+
+# Activate conda environment
+echo "Activating conda environment '${CONDA_ENV_NAME}'..."
+conda activate "${CONDA_ENV_NAME}"
 
 # Verify vLLM installation
 if ! python -c "import vllm" 2>/dev/null; then
-    echo "ERROR: vLLM not found in virtual environment"
+    echo "ERROR: vLLM not found in conda environment '${CONDA_ENV_NAME}'"
     exit 1
 fi
 

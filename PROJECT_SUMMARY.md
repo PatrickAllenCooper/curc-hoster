@@ -24,9 +24,10 @@ All project deliverables have been fully implemented, tested, and documented.
 
 #### 1. Deployment Infrastructure
 - **Environment Setup Script** (`scripts/setup_environment.sh`)
-  - Automated virtual environment creation
-  - vLLM, Ray, PyTorch installation
+  - Automated conda environment creation
+  - vLLM, Ray, PyTorch installation with CUDA support
   - Dependency verification
+  - Login node detection and warnings
   
 - **Single-Node Slurm Job Script** (`scripts/launch_vllm.slurm`)
   - Parameterized GPU allocation

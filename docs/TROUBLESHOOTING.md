@@ -23,11 +23,12 @@ tail -20 logs/vllm-server-<job_id>.out
 # 4. Check for errors
 tail -20 logs/vllm-server-<job_id>.err
 
-# 5. Verify virtual environment
-ls -la vllm-env/
+# 5. Verify conda environment
+conda env list | grep vllm-env
 
-# 6. Test Python imports
-source vllm-env/bin/activate
+# 6. Test Python imports (after loading modules)
+module load anaconda
+conda activate vllm-env
 python -c "import vllm; print(vllm.__version__)"
 ```
 
@@ -57,31 +58,44 @@ ssh your_username@login.rc.colorado.edu echo "Connected"
 
 ### Diagnostic Steps
 
-1. Check module availability:
+1. Check if running on compute node:
 ```bash
-module avail python
+hostname  # Should NOT start with "login"
+# If on login node, run: acompile
+```
+
+2. Check module availability:
+```bash
+module avail anaconda
 module avail cuda
 ```
 
-2. Verify disk space:
+3. Verify disk space in projects directory:
 ```bash
-df -h $HOME
+df -h /projects/$USER
 ```
 
-3. Check Python version:
+4. Check conda version:
 ```bash
-module load python/3.10
-python --version
+module load anaconda
+conda --version
 ```
 
 ### Solutions
 
-**Problem: Insufficient disk space**
-- Clean old files: `rm -rf ~/.cache/pip`
-- Use scratch space: `cd /scratch/alpine/$USER`
+**Problem: Running on login node**
+- Setup script will warn you
+- Run `acompile` first to get onto compute node
+- Then run `./scripts/setup_environment.sh`
 
-**Problem: Module not found**
-- Update module name: `module load python/3.11` (if 3.10 unavailable)
+**Problem: Insufficient disk space**
+- Clean conda cache: `conda clean --all`
+- Clean pip cache: `rm -rf ~/.cache/pip`
+- Check `/projects/$USER` quota (conda uses this by default)
+
+**Problem: Anaconda module not found**
+- Check available versions: `module avail anaconda`
+- Use specific version: `module load anaconda/2023.09`
 - Contact CURC: rc-help@colorado.edu
 
 **Problem: pip install fails**
@@ -92,6 +106,12 @@ python --version
 **Problem: CUDA mismatch**
 - Load matching CUDA: `module load cuda/12.1`
 - Check GPU driver: `nvidia-smi`
+- Verify CUDA version matches PyTorch requirements
+
+**Problem: Conda environment creation fails**
+- Remove partial environment: `conda env remove -n vllm-env`
+- Clear conda cache: `conda clean --all`
+- Try creating manually: `conda create -n vllm-env python=3.10 -y`
 
 ## Issue: Slurm Job Fails to Start
 

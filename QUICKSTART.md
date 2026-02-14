@@ -32,23 +32,37 @@ Clone the repository:
 
 ```bash
 cd ~  # or your preferred directory
-git clone <repository-url> curc-LLM-hoster
-cd curc-LLM-hoster
+git clone https://github.com/PatrickAllenCooper/curc-hoster.git
+cd curc-hoster
 ```
 
-Run the environment setup:
+Get onto a compute node (required - heavy compute cannot be done on login nodes):
+
+```bash
+acompile
+```
+
+Run the conda environment setup:
 
 ```bash
 ./scripts/setup_environment.sh
 ```
 
 This will:
-- Load Python 3.10 and CUDA 12.1 modules
-- Create a virtual environment
+- Load Anaconda and CUDA 12.1 modules
+- Create a conda environment named 'vllm-env'
 - Install vLLM, Ray, PyTorch, and dependencies
 - Verify the installation
 
+**Note**: The script will warn if you're on a login node. Always run `acompile` first to get onto a compute node for environment setup.
+
 Expected time: 10-15 minutes
+
+After setup completes, exit the compile node:
+
+```bash
+exit
+```
 
 ### 2. On CURC: Launch Server (2 minutes)
 
@@ -241,7 +255,7 @@ for chunk in client.chat_stream("Write a haiku about science"):
 
 ### Checklist
 
-- [ ] Virtual environment created on CURC
+- [ ] Conda environment created on CURC (`conda env list` should show 'vllm-env')
 - [ ] vLLM server job running on CURC (check with `squeue`)
 - [ ] SSH tunnel active on local machine
 - [ ] Health check returns OK (`curl http://localhost:8000/health`)

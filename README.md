@@ -34,13 +34,20 @@ For quick deployment, see the [Quick Start Guide](QUICKSTART.md).
 
 ### Step 1: Setup on CURC
 
-SSH to CURC and run the setup script:
+SSH to CURC, get onto a compute node, then run the setup script:
 
 ```bash
 ssh your_username@login.rc.colorado.edu
-cd /path/to/curc-LLM-hoster
+cd /path/to/curc-hoster
+
+# Get onto a compile node (required for environment setup)
+acompile
+
+# Run the conda environment setup
 ./scripts/setup_environment.sh
 ```
+
+**Note**: The setup script uses conda to create the environment. Heavy computation should not be performed on login nodes, so use `acompile` first to get onto a compute node.
 
 ### Step 2: Launch vLLM Server
 
