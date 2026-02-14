@@ -25,10 +25,12 @@ For quick deployment, see the [Quick Start Guide](QUICKSTART.md).
 
 ## Quick Start
 
+For the fastest setup, see the [Quick Reference Card](CURC_QUICK_REFERENCE.md) or follow the steps below.
+
 ### Prerequisites
 
 - CURC Alpine cluster access with GPU allocation
-- Python 3.9+ (both on CURC and local machine)
+- Python 3.9+ on local machine (CURC uses conda)
 - SSH access to `login.rc.colorado.edu`
 - Hugging Face account (for gated model downloads)
 
@@ -218,15 +220,21 @@ For performance benchmarking tools, see `scripts/benchmark_performance.py` and `
 ### Getting Started
 
 - **README.md** (this file): Project overview and quick reference
+- **CURC_QUICK_REFERENCE.md**: One-page cheat sheet for conda setup
 - **QUICKSTART.md**: 15-minute deployment guide for immediate use
 - **PROJECT_SUMMARY.md**: Complete project documentation and technical details
 
-### Guides
+### Setup and Configuration
+
+- **docs/CURC_SETUP.md**: Comprehensive conda environment setup guide
+- **CONDA_MIGRATION.md**: Migration details from venv to conda
+- **docs/TROUBLESHOOTING.md**: Systematic problem solving and debugging
+
+### Advanced Topics
 
 - **docs/MODEL_GUIDE.md**: Model selection and configuration guidance
 - **docs/BENCHMARKING.md**: Performance testing and optimization
 - **docs/MULTI_NODE.md**: Multi-node deployment for large models
-- **docs/TROUBLESHOOTING.md**: Systematic problem solving and debugging
 - **docs/architecture_diagram.md**: System architecture and component diagrams
 
 ### Example Code
