@@ -27,7 +27,7 @@
 set -e
 
 # Configuration
-MODEL_NAME="${MODEL_NAME:-Qwen/Qwen2.5-32B-Instruct-AWQ}"
+MODEL_NAME="${MODEL_NAME:-Qwen/Qwen2.5-7B-Instruct-AWQ}"
 TENSOR_PARALLEL_SIZE="${TENSOR_PARALLEL_SIZE:-1}"
 PORT="${PORT:-8000}"
 HOST="${HOST:-0.0.0.0}"
