@@ -60,6 +60,9 @@ def main():
     conversation = []
     system_prompt = "You are a helpful AI assistant."
     
+    # Resolve model name once up front
+    model_name = client._get_default_model()
+
     # Chat loop
     while True:
         try:
@@ -108,7 +111,7 @@ def main():
             # Stream response
             full_response = ""
             stream = client.openai_client.chat.completions.create(
-                model="default",
+                model=model_name,
                 messages=messages,
                 temperature=0.7,
                 max_tokens=512,
