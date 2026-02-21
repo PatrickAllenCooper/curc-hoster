@@ -153,16 +153,16 @@ class TestErrorHandling:
             client.health_check()
     
     def test_malformed_response(self):
-        """Test handling of malformed JSON response."""
+        """Test handling of malformed JSON response from get_models."""
         with patch('src.client.curc_llm_client.httpx.Client') as mock_httpx:
             mock_response = Mock()
             mock_response.json.side_effect = ValueError("Invalid JSON")
             mock_httpx.return_value.get.return_value = mock_response
-            
+
             client = CURCLLMClient()
-            
+
             with pytest.raises(ValueError):
-                client.health_check()
+                client.get_models()
 
 
 class TestEdgeCases:

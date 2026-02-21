@@ -205,13 +205,15 @@ class TestCURCLLMClient:
     def test_health_check(self, mock_httpx):
         """Test health check endpoint."""
         mock_response = Mock()
-        mock_response.json.return_value = {"status": "healthy"}
+        mock_response.status_code = 200
+        mock_response.text = ""
         mock_httpx.return_value.get.return_value = mock_response
-        
+
         client = CURCLLMClient()
         health = client.health_check()
-        
-        assert health == {"status": "healthy"}
+
+        assert health["status"] == "ok"
+        assert health["http"] == 200
         mock_httpx.return_value.get.assert_called_with("http://localhost:8000/health")
     
     @patch('src.client.curc_llm_client.httpx.Client')

@@ -179,11 +179,13 @@ class TestScripts:
     def test_setup_environment_script_exists(self):
         """Test setup_environment.sh exists."""
         assert os.path.exists('scripts/setup_environment.sh')
-        
-        # Check it's executable
+
+        # Executable bit only meaningful on POSIX systems
         import stat
-        st = os.stat('scripts/setup_environment.sh')
-        assert st.st_mode & stat.S_IXUSR
+        import platform
+        if platform.system() != "Windows":
+            st = os.stat('scripts/setup_environment.sh')
+            assert st.st_mode & stat.S_IXUSR
     
     def test_launch_vllm_script_exists(self):
         """Test launch_vllm.slurm exists."""
@@ -198,11 +200,13 @@ class TestScripts:
     def test_create_tunnel_script_exists(self):
         """Test create_tunnel.sh exists."""
         assert os.path.exists('scripts/create_tunnel.sh')
-        
-        # Check it's executable
+
+        # Executable bit only meaningful on POSIX systems
         import stat
-        st = os.stat('scripts/create_tunnel.sh')
-        assert st.st_mode & stat.S_IXUSR
+        import platform
+        if platform.system() != "Windows":
+            st = os.stat('scripts/create_tunnel.sh')
+            assert st.st_mode & stat.S_IXUSR
 
 
 class TestRequirements:
