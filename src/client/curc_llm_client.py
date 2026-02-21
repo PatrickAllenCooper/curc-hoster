@@ -113,7 +113,7 @@ class CURCLLMClient:
         messages.append({"role": "user", "content": message})
         
         response = self.openai_client.chat.completions.create(
-            model=model or "default",
+            model=model or self._get_default_model(),
             messages=messages,
             temperature=temperature,
             max_tokens=max_tokens,
@@ -153,7 +153,7 @@ class CURCLLMClient:
         messages.append({"role": "user", "content": message})
         
         stream = self.openai_client.chat.completions.create(
-            model=model or "default",
+            model=model or self._get_default_model(),
             messages=messages,
             temperature=temperature,
             max_tokens=max_tokens,
@@ -187,7 +187,7 @@ class CURCLLMClient:
             Generated completion text
         """
         response = self.openai_client.completions.create(
-            model=model or "default",
+            model=model or self._get_default_model(),
             prompt=prompt,
             temperature=temperature,
             max_tokens=max_tokens,
@@ -218,7 +218,7 @@ class CURCLLMClient:
             Completion text chunks as they arrive
         """
         stream = self.openai_client.completions.create(
-            model=model or "default",
+            model=model or self._get_default_model(),
             prompt=prompt,
             temperature=temperature,
             max_tokens=max_tokens,
@@ -230,16 +230,27 @@ class CURCLLMClient:
             if chunk.choices[0].text:
                 yield chunk.choices[0].text
     
+    def _get_default_model(self) -> str:
+        """Fetch the first available model name from the server."""
+        response = self.http_client.get(f"{self.base_url}/v1/models")
+        response.raise_for_status()
+        models = response.json().get("data", [])
+        if not models:
+            raise RuntimeError("No models available on the server.")
+        return models[0]["id"]
+
     def health_check(self) -> Dict:
         """
         Check server health status.
-        
+
         Returns:
             Health status dictionary
         """
         response = self.http_client.get(f"{self.base_url}/health")
         response.raise_for_status()
-        return response.json()
+        # vLLM 0.11+ returns 200 with empty body
+        text = response.text.strip()
+        return {"status": "ok", "http": response.status_code, "body": text or "(empty)"}
     
     def get_models(self) -> List[Dict]:
         """
