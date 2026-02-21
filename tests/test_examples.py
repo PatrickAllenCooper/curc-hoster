@@ -124,53 +124,46 @@ class TestConfigurationFiles:
 
 
 class TestDocumentation:
-    """Test documentation files exist and are valid."""
-    
+    """Test README is the single documentation source."""
+
     def test_readme_exists(self):
-        """Test README.md exists."""
+        """Test README.md exists and contains required sections."""
         assert os.path.exists('README.md')
-        
+
         with open('README.md', 'r') as f:
             content = f.read()
-        
+
         assert len(content) > 0
         assert 'CURC' in content
-    
-    def test_quickstart_exists(self):
-        """Test QUICKSTART.md exists."""
-        assert os.path.exists('QUICKSTART.md')
-        
-        with open('QUICKSTART.md', 'r') as f:
+
+    def test_readme_covers_setup(self):
+        """Test README covers CURC setup instructions."""
+        with open('README.md', 'r') as f:
             content = f.read()
-        
-        assert 'Quick Start' in content
-    
-    def test_project_summary_exists(self):
-        """Test PROJECT_SUMMARY.md exists."""
-        assert os.path.exists('PROJECT_SUMMARY.md')
-        
-        with open('PROJECT_SUMMARY.md', 'r') as f:
+
+        assert 'sbatch' in content
+        assert 'SSH' in content or 'ssh' in content
+
+    def test_readme_covers_models(self):
+        """Test README documents model options."""
+        with open('README.md', 'r') as f:
             content = f.read()
-        
-        assert 'Project Summary' in content
-    
-    def test_model_guide_exists(self):
-        """Test MODEL_GUIDE.md exists."""
-        assert os.path.exists('docs/MODEL_GUIDE.md')
-        
-        with open('docs/MODEL_GUIDE.md', 'r') as f:
+
+        assert 'Qwen' in content
+
+    def test_readme_covers_troubleshooting(self):
+        """Test README has a troubleshooting section."""
+        with open('README.md', 'r') as f:
             content = f.read()
-        
-        assert 'Model' in content
-    
-    def test_troubleshooting_exists(self):
-        """Test TROUBLESHOOTING.md exists."""
-        assert os.path.exists('docs/TROUBLESHOOTING.md')
-        
-        with open('docs/TROUBLESHOOTING.md', 'r') as f:
+
+        assert 'Troubleshooting' in content or 'troubleshooting' in content
+
+    def test_readme_covers_storage(self):
+        """Test README documents storage guidelines."""
+        with open('README.md', 'r') as f:
             content = f.read()
-        
-        assert 'Troubleshooting' in content
+
+        assert 'scratch' in content or '/scratch' in content
 
 
 class TestScripts:

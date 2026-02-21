@@ -1,6 +1,6 @@
 # CURC LLM Hoster
 
-Production-grade Large Language Model inference infrastructure for University of Colorado Boulder Research Computing resources.
+Production-grade Large Language Model inference on University of Colorado Boulder Research Computing (CURC) Alpine cluster, with OpenAI-compatible API access from local machines.
 
 **Author**: Patrick Cooper
 
@@ -8,347 +8,312 @@ Production-grade Large Language Model inference infrastructure for University of
 
 ## Overview
 
-This project provides a complete deployment solution for hosting and serving Large Language Models on CURC's Alpine HPC cluster. Built on vLLM and Ray, it enables efficient multi-GPU and multi-node inference with OpenAI-compatible API endpoints.
+This project deploys vLLM inference servers on CURC's A100 GPU nodes and exposes them through an SSH tunnel as a local OpenAI-compatible API. It includes a Python client SDK, interactive examples, and a full test suite.
 
-For quick deployment, see the [Quick Start Guide](QUICKSTART.md).
+**What it enables:**
+- Host state-of-the-art open-source LLMs on institutional HPC resources
+- Query models from any local machine using the OpenAI API format
+- Avoid commercial API costs while maintaining data privacy
+- Scale from a single A100 to multi-node tensor-parallel deployments
 
-## Key Features
+---
 
-- **High Performance**: Greater than 500 tokens/second throughput on single A100 GPU
-- **Scalable**: Multi-GPU and multi-node distributed inference via Ray
-- **Memory Efficient**: PagedAttention reduces memory waste by 60-80%
-- **API Compatible**: OpenAI-compatible REST API for easy integration
-- **Production Ready**: Supports concurrent multi-user workloads (10-100 users)
-- **CURC Optimized**: Native Slurm integration with Alpine cluster allocation management
-- **Comprehensive Testing**: 71 tests with 100% code coverage
-- **Well Documented**: Complete guides for deployment, usage, and troubleshooting
+## Requirements
 
-## Quick Start
+**On CURC:**
+- Alpine cluster account with GPU allocation (`aa100` partition)
+- `vllm-env` conda environment (created by `scripts/setup_environment.sh`)
 
-For the fastest setup, see the [Quick Reference Card](CURC_QUICK_REFERENCE.md) or follow the steps below.
+**On your local machine:**
+- Python 3.9+
+- SSH client
 
-### Prerequisites
+---
 
-- CURC Alpine cluster access with GPU allocation
-- Python 3.9+ on local machine (CURC uses conda)
-- SSH access to `login.rc.colorado.edu`
-- Hugging Face account (for gated model downloads)
+## Repository Structure
 
-### Step 1: Setup on CURC
-
-SSH to CURC, get onto a compute node, then run the setup script:
-
-```bash
-ssh your_username@login.rc.colorado.edu
-cd /path/to/curc-hoster
-
-# Get onto a compile node (required for environment setup)
-acompile
-
-# Run the conda environment setup
-./scripts/setup_environment.sh
+```
+curc-hoster/
+├── scripts/
+│   ├── launch_vllm.slurm           # Single-node SLURM job
+│   ├── launch_vllm_multinode.slurm # Multi-node tensor-parallel job
+│   ├── setup_environment.sh        # One-time conda environment setup
+│   ├── create_tunnel.sh            # SSH tunnel helper
+│   └── benchmark_performance.py    # Throughput and latency benchmarking
+├── src/client/
+│   └── curc_llm_client.py          # Python client SDK
+├── examples/
+│   ├── basic_chat.py               # Single-turn chat
+│   ├── streaming_chat.py           # Streaming response
+│   └── interactive_chat.py         # Multi-turn CLI
+├── tests/                          # 73 tests, 99% coverage
+├── config/
+│   ├── server_config.yaml          # vLLM presets (8 configurations)
+│   └── .env.example                # Environment variable template
+├── requirements.txt
+└── test_connection.py              # Quick end-to-end connectivity check
 ```
 
-**Note**: The setup script uses conda to create the environment. Heavy computation should not be performed on login nodes, so use `acompile` first to get onto a compute node.
+---
 
-### Step 2: Launch vLLM Server
+## CURC Setup (One-Time)
 
-Submit a Slurm job:
+SSH into CURC and get onto a compile node — environment setup cannot run on login nodes:
 
 ```bash
+ssh paco0228@login.rc.colorado.edu
+cd /projects/paco0228/curc-hoster
+acompile
+./scripts/setup_environment.sh
+exit
+```
+
+The script creates a `vllm-env` conda environment with vLLM, PyTorch (CUDA), and Ray. This takes 10-15 minutes on first run.
+
+**Storage note:** The conda environment installs into `/projects/paco0228/software/anaconda/envs/vllm-env/`. Model weights download to `/scratch/alpine/paco0228/hf_cache/` (set automatically by the SLURM script). Do not store large files in your home directory or `/projects` directly.
+
+---
+
+## Launching the Server
+
+From the CURC login node, submit a SLURM job:
+
+```bash
+cd /projects/paco0228/curc-hoster
 sbatch scripts/launch_vllm.slurm
 ```
 
-Check job status and note the job ID:
+Override the model or GPU count at submission time:
 
 ```bash
-squeue -u $USER
-# Note your job ID (e.g., 123456)
+MODEL_NAME="Qwen/Qwen2.5-72B-Instruct-AWQ" \
+TENSOR_PARALLEL_SIZE=2 \
+sbatch --gres=gpu:2 scripts/launch_vllm.slurm
 ```
 
-### Step 3: Create SSH Tunnel
-
-On your local machine:
+Monitor the job:
 
 ```bash
-./scripts/create_tunnel.sh 123456  # Replace with your job ID
+squeue -u paco0228
+tail -f logs/vllm-server-<JOBID>.out
 ```
 
-Keep this terminal open while using the server.
+The server is ready when the log shows:
 
-### Step 4: Install Local Client
+```
+INFO:     Application startup complete.
+```
 
-On your local machine:
+Note the compute node name from `squeue` (e.g., `c3gpu-c2-u9`) — you need it for the tunnel.
+
+---
+
+## SSH Tunnel
+
+Open a new local terminal and keep it running while you use the server:
+
+```bash
+ssh -L 8000:<NODE>.rc.int.colorado.edu:8000 paco0228@login.rc.colorado.edu
+```
+
+Replace `<NODE>` with the node from `squeue` (e.g., `c3gpu-c2-u9`). Approve the Duo push when prompted.
+
+The server is now accessible at `http://localhost:8000`.
+
+---
+
+## Local Client
+
+### Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Step 5: Query the LLM
-
-Run the interactive chat:
+### Verify the connection
 
 ```bash
-python examples/interactive_chat.py
+python test_connection.py
 ```
 
-Or use the Python client:
+Expected output:
+
+```
+1. Testing health endpoint...
+   ✓ Health check: HTTP 200 (ok)
+
+2. Testing models endpoint...
+   ✓ Available models: 1
+     - Qwen/Qwen2.5-7B-Instruct-AWQ
+
+SUCCESS! Server is ready to use.
+```
+
+### Run the examples
+
+```bash
+python examples/basic_chat.py        # Single question, printed response
+python examples/streaming_chat.py    # Streaming token output
+python examples/interactive_chat.py  # Multi-turn CLI (/quit to exit)
+```
+
+### Use the SDK directly
 
 ```python
 from src.client.curc_llm_client import CURCLLMClient
 
 client = CURCLLMClient(base_url="http://localhost:8000")
-response = client.chat("Explain quantum computing in simple terms.")
+
+# Single-turn chat
+response = client.chat("Explain quantum entanglement.")
 print(response)
+
+# Streaming
+for chunk in client.chat_stream("Write a haiku about high-performance computing."):
+    print(chunk, end="", flush=True)
+
+# With system prompt
+response = client.chat(
+    "Summarize this paper abstract: ...",
+    system_prompt="You are a research assistant. Be concise.",
+    temperature=0.3,
+    max_tokens=256,
+)
 ```
 
-For detailed instructions, see the [Quick Start Guide](QUICKSTART.md) and [documentation](#documentation).
+The client auto-discovers the loaded model name from `/v1/models` — no need to hard-code it.
 
-## Project Structure
+---
 
-```
-curc-LLM-hoster/
-├── README.md                           # Project overview
-├── QUICKSTART.md                       # 15-minute setup guide
-├── PROJECT_SUMMARY.md                  # Complete project documentation
-├── LICENSE                             # MIT License
-├── requirements.txt                    # Python dependencies
-├── setup.py                            # Package installation
-├── pytest.ini                          # Test configuration
-│
-├── scripts/                            # Deployment automation
-│   ├── setup_environment.sh            # CURC environment setup
-│   ├── launch_vllm.slurm               # Single-node Slurm job
-│   ├── launch_vllm_multinode.slurm     # Multi-node deployment
-│   ├── create_tunnel.sh                # SSH tunnel automation
-│   └── benchmark_performance.py        # Performance benchmarking
-│
-├── src/                                # Source code
-│   └── client/                         # Client SDK
-│       ├── __init__.py
-│       └── curc_llm_client.py          # OpenAI-compatible client
-│
-├── examples/                           # Usage examples
-│   ├── basic_chat.py                   # Simple chat example
-│   ├── streaming_chat.py               # Streaming responses
-│   └── interactive_chat.py             # Interactive CLI
-│
-├── config/                             # Configuration files
-│   ├── server_config.yaml              # vLLM server configs (8 presets)
-│   └── .env.example                    # Environment template
-│
-├── tests/                              # Test suite (100% coverage)
-│   ├── __init__.py
-│   ├── test_client.py                  # Client tests (22 tests)
-│   ├── test_validation.py              # Validation tests (23 tests)
-│   ├── test_examples.py                # Infrastructure tests (20 tests)
-│   ├── test_benchmark.py               # Benchmark tests (6 tests)
-│   └── TEST_REPORT.md                  # Detailed test documentation
-│
-└── docs/                               # Documentation
-    ├── MODEL_GUIDE.md                  # Model selection guide
-    ├── BENCHMARKING.md                 # Performance benchmarking
-    ├── MULTI_NODE.md                   # Multi-node deployment
-    ├── TROUBLESHOOTING.md              # Problem solving
-    └── architecture_diagram.md         # System diagrams
+## Model Selection
+
+The default model is `Qwen/Qwen2.5-7B-Instruct-AWQ`, which fits in a single A100 with 60% memory utilization. Change it by setting `MODEL_NAME` at job submission.
+
+| Model | VRAM | Context | Notes |
+|---|---|---|---|
+| `Qwen/Qwen2.5-7B-Instruct-AWQ` | ~8 GB | 128K | Default. Fast, fits easily. |
+| `Qwen/Qwen2.5-32B-Instruct-AWQ` | ~16 GB | 128K | Better quality, single GPU. |
+| `Qwen/Qwen2.5-72B-Instruct-AWQ` | ~36 GB | 128K | Top quality, single A100 80GB. |
+| `hugging-quants/Meta-Llama-3.3-70B-Instruct-AWQ-INT4` | ~35 GB | 128K | Strong on coding tasks. |
+
+For models larger than 80 GB, use `launch_vllm_multinode.slurm` with multiple GPUs and `TENSOR_PARALLEL_SIZE` matching the GPU count.
+
+---
+
+## Storage Guidelines
+
+| Path | Purpose | Limit |
+|---|---|---|
+| `/projects/paco0228/` | Code, configs, small outputs | 250 GB quota |
+| `/scratch/alpine/paco0228/` | HF model cache, job outputs, temp data | Purged after 90 days |
+| `~` (home) | Config files only | 2 GB quota — do not store models here |
+
+The SLURM script sets `HF_HOME=/scratch/alpine/paco0228/hf_cache` automatically. Models download once and are reused on subsequent jobs.
+
+---
+
+## Configuration
+
+`config/server_config.yaml` contains eight pre-built vLLM server profiles. Copy relevant settings into the SLURM script or pass them as environment variables:
+
+```bash
+MAX_MODEL_LEN=8192 GPU_MEMORY_UTILIZATION=0.85 sbatch scripts/launch_vllm.slurm
 ```
 
-## Architecture
+Key variables accepted by `launch_vllm.slurm`:
 
-The system deploys vLLM inference servers across CURC Alpine cluster nodes, orchestrated by Ray for distributed inference:
+| Variable | Default | Description |
+|---|---|---|
+| `MODEL_NAME` | `Qwen/Qwen2.5-7B-Instruct-AWQ` | HuggingFace model ID |
+| `TENSOR_PARALLEL_SIZE` | `1` | Number of GPUs for tensor parallelism |
+| `PORT` | `8000` | Server port |
+| `MAX_MODEL_LEN` | `4096` | Maximum sequence length |
+| `GPU_MEMORY_UTILIZATION` | `0.6` | Fraction of GPU VRAM to use |
+| `API_KEY` | *(none)* | Optional bearer token for API auth |
 
-- **Frontend**: OpenAI-compatible REST API
-- **Backend**: vLLM inference engine with PagedAttention
-- **Orchestration**: Ray cluster for multi-node coordination
-- **Scheduling**: Slurm job submission and resource management
+---
 
-For detailed architecture documentation, see `docs/architecture_diagram.md` and `PROJECT_SUMMARY.md`.
+## Multi-Node Deployment
 
-## Supported Models
+For models that exceed a single A100's memory (e.g., 405B parameter models):
 
-The infrastructure supports any Hugging Face model compatible with vLLM.
+```bash
+TENSOR_PARALLEL_SIZE=8 sbatch --nodes=2 --gres=gpu:4 scripts/launch_vllm_multinode.slurm
+```
 
-### Recommended High-End Models for Single A100 80GB (AWQ Quantized)
+The multinode script launches a Ray cluster across the allocated nodes automatically.
 
-Based on February 2026 open source LLM rankings:
-
-**Qwen 2.5 72B AWQ** (Recommended)
-- Top ranked open source model as of February 2026
-- Memory: ~36 GB VRAM, 128K context window
-- License: Apache 2.0
-- Model ID: `Qwen/Qwen2.5-72B-Instruct-AWQ`
-
-**Llama 3.3 70B AWQ**
-- Excellent performance on coding tasks
-- Memory: ~35 GB VRAM
-- Model ID: `hugging-quants/Meta-Llama-3.3-70B-Instruct-AWQ-INT4`
-
-**Llama 3.1 70B AWQ**
-- Proven stability and wide adoption
-- Memory: ~35 GB VRAM
-- Model ID: `hugging-quants/Meta-Llama-3.1-70B-Instruct-AWQ-INT4`
-
-**Qwen 2.5 32B AWQ** (Fastest)
-- 2-3x faster inference than 70B models
-- Memory: ~16 GB VRAM, 128K context window
-- Model ID: `Qwen/Qwen2.5-32B-Instruct-AWQ`
-
-For detailed model selection guidance, see `docs/MODEL_GUIDE.md`.
-
-### Also Supported
-
-- Llama 3.1 (8B, 70B, 405B) - FP16 multi-GPU
-- Mistral/Mixtral series
-- Gemma series
-- DeepSeek models
-- And many more from Hugging Face
-
-## Performance Characteristics
-
-Benchmarked on NVIDIA A100 (80GB) with vLLM:
-
-- **Throughput**: 793 tokens/second (single GPU, unquantized models)
-- **Latency**: P99 less than 100ms for interactive queries
-- **Concurrency**: Supports 10-100 simultaneous users
-- **Memory Efficiency**: 60-80% reduction in KV cache fragmentation vs naive implementation
-- **Scalability**: Linear scaling with multi-GPU tensor parallelism
-
-For performance benchmarking tools, see `scripts/benchmark_performance.py` and `docs/BENCHMARKING.md`.
-
-## Documentation
-
-### Getting Started
-
-- **README.md** (this file): Project overview and quick reference
-- **CURC_QUICK_REFERENCE.md**: One-page cheat sheet for conda setup
-- **QUICKSTART.md**: 15-minute deployment guide for immediate use
-- **PROJECT_SUMMARY.md**: Complete project documentation and technical details
-
-### Setup and Configuration
-
-- **docs/CURC_SETUP.md**: Comprehensive conda environment setup guide
-- **CONDA_MIGRATION.md**: Migration details from venv to conda
-- **docs/TROUBLESHOOTING.md**: Systematic problem solving and debugging
-
-### Advanced Topics
-
-- **docs/MODEL_GUIDE.md**: Model selection and configuration guidance
-- **docs/BENCHMARKING.md**: Performance testing and optimization
-- **docs/MULTI_NODE.md**: Multi-node deployment for large models
-- **docs/architecture_diagram.md**: System architecture and component diagrams
-
-### Example Code
-
-- `examples/basic_chat.py`: Simple synchronous chat
-- `examples/streaming_chat.py`: Streaming response demonstration
-- `examples/interactive_chat.py`: Full-featured CLI interface
-
-### External References
-
-- [CURC Alpine Documentation](https://curc.readthedocs.io/en/latest/ai-ml/llms.html)
-- [vLLM Official Documentation](https://docs.vllm.ai/)
-- [vLLM OpenAI Server Guide](https://docs.vllm.ai/en/stable/serving/openai_compatible_server/)
-- [PagedAttention Paper (arXiv:2309.06180)](https://arxiv.org/abs/2309.06180)
-
-## Implementation Status
-
-This project is complete and production-ready. Key features include:
-
-- Single-node and multi-node deployment scripts
-- SSH tunnel automation for secure local access
-- Python client SDK with 100% test coverage
-- Comprehensive test suite (71 unit tests passing)
-- Performance benchmarking suite (latency, throughput, concurrency)
-- Complete documentation and working examples
-- Configuration management with 8 model presets
-- Support for state-of-the-art models (Qwen 2.5 72B, Llama 3.3 70B)
-
-The system is ready for immediate deployment on CURC resources.
+---
 
 ## Testing
 
-Run the test suite:
+```bash
+python -m pytest tests/ -v
+```
+
+With coverage:
 
 ```bash
-pytest tests/ -v
+python -m pytest tests/ --cov=src --cov-report=html
 ```
 
-With coverage report:
+**Current status:** 73 tests passing, 99% coverage across:
+- Client SDK (chat, streaming, completions, health, model listing)
+- Parameter validation and edge cases
+- Error handling and concurrency
+- Infrastructure and configuration validation
+- Performance benchmarking utilities
+
+---
+
+## Troubleshooting
+
+**`Connection refused` on `test_connection.py`**
+The SSH tunnel is not established. Make sure the tunnel terminal is open and the node name matches what `squeue` shows.
+
+**`WinError 10054` (connection forcibly closed)**
+The vLLM server is still loading the model. Wait for `Application startup complete` in the job log, then retry.
+
+**Server takes 15+ minutes to start**
+The model is downloading from HuggingFace. This only happens on first use per model. Subsequent starts load from `/scratch/alpine/paco0228/hf_cache/` in 1-2 minutes.
+
+**`The model 'default' does not exist`**
+An outdated version of the client is being used. Pull the latest code: `git pull`.
+
+**SLURM job stuck in `PD` (pending)**
+GPU nodes are busy. Check wait time with `sinfo -p aa100`. Try `atesting` partition for short debug sessions (`--time=00:30:00`).
+
+**Out of disk space**
+Clear the HuggingFace cache on scratch: `rm -rf /scratch/alpine/paco0228/hf_cache/hub/<model>`. Clear conda caches: `conda clean --all`.
+
+**`module: command not found` in SLURM log**
+The SLURM script uses `module load anaconda`. If this fails, check `module avail anaconda` on a login node and update the module name in the script.
+
+---
+
+## Performance
+
+Benchmarked on a single NVIDIA A100 80GB with `Qwen/Qwen2.5-7B-Instruct-AWQ`:
+
+- Throughput: ~793 tokens/second
+- Time to first token: <100ms (P99)
+- KV cache: 319,296 tokens available (17 GB)
+- Max concurrency: ~78 simultaneous requests at 4,096 tokens each
+
+Run the benchmark suite:
 
 ```bash
-pytest tests/ --cov=src --cov-report=html
-open htmlcov/index.html  # View detailed report
+python scripts/benchmark_performance.py --url http://localhost:8000
 ```
 
-**Test Statistics**:
-- 71 unit tests passing
-- 100% code coverage (exceeds 90% requirement)
-- 4 test suites covering all components
-- Comprehensive mocking for offline testing
-- Integration tests available (require running server)
+---
 
-**Test Coverage**:
-- Core client functionality (22 tests)
-- Parameter validation and edge cases (23 tests)
-- Infrastructure and documentation validation (20 tests)
-- Performance benchmarking (6 tests)
-- Error handling and concurrency scenarios
-- Unicode, special characters, and extreme values
+## License
 
-Complete test documentation available in `tests/TEST_REPORT.md`.
-
-## Project Information
-
-### Author
-
-Patrick Cooper  
-University of Colorado Boulder
-
-### Status
-
-This project is complete and production-ready. All components have been fully implemented and tested.
-
-### License
-
-MIT License. See LICENSE file for details.
-
-### Citation
-
-If you use this work in your research, please cite:
-
-```bibtex
-@software{cooper2026curc,
-  author = {Cooper, Patrick},
-  title = {CURC LLM Hoster: Production-Grade LLM Inference on HPC Resources},
-  year = {2026},
-  url = {https://github.com/PatrickAllenCooper/curc-hoster}
-}
-```
-
-### Support
-
-For issues or questions:
-- CURC cluster support: rc-help@colorado.edu
-- Project repository: https://github.com/PatrickAllenCooper/curc-hoster
-
-### Acknowledgments
-
-This project builds upon the following technologies:
-- University of Colorado Boulder Research Computing (CURC) infrastructure
-- vLLM inference engine by UC Berkeley
-- Ray distributed computing framework
-- Hugging Face model ecosystem
+MIT License. See `LICENSE` for details.
 
 ## References
 
-### Technical Papers
-
-- Kwon et al. (2023). "Efficient Memory Management for Large Language Model Serving with PagedAttention." arXiv:2309.06180.
-- Performance comparison study: "Comparative Analysis of Large Language Model Inference Serving Systems" arXiv:2511.17593.
-
-### Documentation
-
-- [CURC Alpine Documentation](https://curc.readthedocs.io/)
-- [vLLM Official Documentation](https://docs.vllm.ai/)
-- [Ray Documentation](https://docs.ray.io/)
-- [OpenAI API Reference](https://platform.openai.com/docs/api-reference)
+- [CURC Documentation](https://curc.readthedocs.io)
+- [vLLM Documentation](https://docs.vllm.ai)
+- [Kwon et al. (2023), "Efficient Memory Management for LLM Serving with PagedAttention"](https://arxiv.org/abs/2309.06180)

@@ -60,6 +60,7 @@ class CURCLLMClient:
         self.api_key = api_key or os.getenv("CURC_LLM_API_KEY")
         self.timeout = timeout
         self.max_retries = max_retries
+        self._model_cache: Optional[str] = None
         
         # Initialize OpenAI client for chat completions
         self.openai_client = OpenAI(
@@ -231,13 +232,16 @@ class CURCLLMClient:
                 yield chunk.choices[0].text
     
     def _get_default_model(self) -> str:
-        """Fetch the first available model name from the server."""
+        """Return the first available model name, fetching once and caching."""
+        if self._model_cache:
+            return self._model_cache
         response = self.http_client.get(f"{self.base_url}/v1/models")
         response.raise_for_status()
         models = response.json().get("data", [])
         if not models:
             raise RuntimeError("No models available on the server.")
-        return models[0]["id"]
+        self._model_cache = models[0]["id"]
+        return self._model_cache
 
     def health_check(self) -> Dict:
         """
