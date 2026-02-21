@@ -39,9 +39,17 @@ GPU_MEMORY_UTILIZATION="${GPU_MEMORY_UTILIZATION:-0.6}"
 WORK_DIR="${SLURM_SUBMIT_DIR}"
 LOG_DIR="${WORK_DIR}/logs"
 CONDA_ENV_NAME="vllm-env"
+SCRATCH_DIR="/scratch/alpine/${USER}"
+HF_CACHE="${SCRATCH_DIR}/hf_cache"
 
-# Create log directory
-mkdir -p "${LOG_DIR}"
+# Point HuggingFace and vLLM caches to scratch (not home directory)
+export HF_HOME="${HF_CACHE}"
+export HUGGINGFACE_HUB_CACHE="${HF_CACHE}/hub"
+export TRANSFORMERS_CACHE="${HF_CACHE}/hub"
+export HF_DATASETS_CACHE="${HF_CACHE}/datasets"
+
+# Create required directories
+mkdir -p "${LOG_DIR}" "${HF_CACHE}"
 
 # Print job information
 echo "============================================"
